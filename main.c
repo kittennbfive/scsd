@@ -160,7 +160,7 @@ int main(int argc, char ** argv)
 			pos++;
 		time_t t=time(NULL);
 		struct tm * tm=localtime(&t);
-		snprintf(filename, SZ_BUF_FILENAME, "%s_%02d.%02d_%02d:%02d:%02d.%s", &device[pos], tm->tm_mday, tm->tm_mon+1, tm->tm_hour, tm->tm_min, tm->tm_sec, png?"png":"bmp");
+		snprintf(filename, SZ_BUF_FILENAME, "%s_%02d.%02d_%02d.%02d.%02d.%s", &device[pos], tm->tm_mday, tm->tm_mon+1, tm->tm_hour, tm->tm_min, tm->tm_sec, png?"png":"bmp");
 		filename[SZ_BUF_FILENAME]='\0';
 	}
 	
