@@ -1,7 +1,8 @@
 # scsd (scope screen dumper)
 
 ## What is this?
-This is a small and simple Linux only screen dumper for Rigol MSO5000 series (and possibly other) oscilloscopes connected via USB. It simply requests the current screen content as BMP or PNG from the device and saves it into a file. It is meant to be used from inside a terminal or called directly, maybe mapped to a hot key for maximum convenience? In contrast to a lot of other similar tools this code only depends on libc and (optionally) libnotify, ie it avoids the (sometimes bloated) third-party abstraction layers.
+This is a small and simple Linux only screen dumper for Rigol MSO5000 series (and possibly other) oscilloscopes connected via USB. It simply requests the current screen content as BMP or PNG from the device and saves it into a file. It is meant to be used from inside a terminal or called directly, maybe mapped to a hot key for maximum convenience? In contrast to a lot of other similar tools this code only depends on libc and (optionally) libnotify, ie it avoids the (sometimes bloated) third-party abstraction layers.  
+NEW: Version 0.2 can also request the results of the integrated protocol decoders as `.csv`.
 
 ## Licence and disclaimer
 This tool is licenced under AGPLv3+ and comes WITHOUT ANY WARRANTY! Please note that the command for PNG output is undocumented so in theory your (expensive) scope could explode. Use at your own risk.
@@ -29,31 +30,40 @@ Run `./make` (i really need to learn Makefiles...) which is just a wrapper aroun
 ## How to use
 As said this tool is made so it can run from a terminal or be called directly via a hot key. In the latter case it will use notifications (those small messages you see appearing on the top right of your screen sometimes) to tell the user what is going on. This behaviour can be disabled at runtime (or directly at compile-time) so the tool will be completly quiet.
 ### Arguments
-#### --device [mandatory]
-Usually this will be `/dev/usbtmc0` unless you have several USBTMC capable devices connected to your computer.
+#### --device
+Usually this will be `/dev/usbtmc0` unless you have several USBTMC capable devices connected to your computer. If not specified the tool will now fallback to device `DEFAULT_DEVICE`, ie by default `/dev/usbtmc0`.
 #### --folder
 Where do you want your screenshot to be saved? If not provided, the file will be created where the executable is.
 #### --filename
 Filename for your screenshot, if not provided a sane default will be used.
 #### --png
 Ask the scope for PNG (much smaller file) instead of default BMP. This uses an **undocumented** command, so use at your own risk. Thanks to the people from the eevblog-forum where i found this!
+#### --csv
+Ask the scope for CSV data from `--decoder n` (n defaults to 1) instead of a screenshot.
 #### --no-notif
 Don't show any notification(s).
 
-### Speed?
+## Speed?
 Fast:
 ```
-$ time ./scsd --dev /dev/usbtmc0 
-real    0m0,631s
-user    0m0,003s
-sys     0m0,049s
+$ time ./scsd
+no device specified, using default /dev/usbtmc0
+
+real    0m0,608s
+user    0m0,023s
+sys     0m0,045s
 ```
 And even faster with PNG (less data to transfer):
 ```
-$ time ./scsd --dev /dev/usbtmc0 --png
+$ time ./scsd --png
+no device specified, using default /dev/usbtmc0
 
-real    0m0,277s
-user    0m0,001s
-sys     0m0,005s
+real    0m0,309s
+user    0m0,007s
+sys     0m0,007s
 ```
 (YMMV of course depending on your hardware and so on)
+
+## Bugs/Limitations
+If you accidentally ask for data from a disabled decoder (e.g. `--decoder 2` but only number 1 is active) the scope will stop responding via USB. A somewhat hacky workaround is to use `usbreset` (package `usbutils` on Debian), but i am not happy with that. If somebody knows a better way please open an issue.  
+It seems like the scope returns at most 6000 results from the protocol decoders. If somebody knows how to increment this number please share some informations.
